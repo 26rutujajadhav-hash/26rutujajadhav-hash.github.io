@@ -1,0 +1,731 @@
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>AI Study Planner & Reminder System</title>  
+    <style>  
+        * {  
+            box-sizing: border-box;  
+        }  body {  
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);  
+        color: #333;  
+        margin: 0;  
+        padding: 20px;  
+        display: flex;  
+        flex-direction: column;  
+        align-items: center;  
+        min-height: 100vh;  
+    }  
+
+    .main-wrapper {  
+        display: flex;  
+        gap: 20px;  
+        width: 100%;  
+        max-width: 1200px;  
+        flex-wrap: wrap;  
+        justify-content: center;  
+    }  
+
+    .container {  
+        background: white;  
+        padding: 30px;  
+        border-radius: 12px;  
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);  
+        width: 100%;  
+        max-width: 500px;  
+        box-sizing: border-box;  
+    }  
+
+    h1 {  
+        color: #2c3e50;  
+        margin-top: 0;  
+        font-size: 24px;  
+        text-align: center;  
+    }  
+
+    h2 {  
+        color: #2c3e50;  
+        font-size: 20px;  
+        margin-top: 0;  
+        margin-bottom: 15px;  
+        border-bottom: 2px solid #3498db;  
+        padding-bottom: 10px;  
+    }  
+
+    h3 {  
+        color: #2c3e50;  
+        font-size: 18px;  
+        margin: 15px 0 10px 0;  
+    }  
+
+    label {  
+        font-weight: 600;  
+        display: block;  
+        margin: 15px 0 5px;  
+        color: #2c3e50;  
+    }  
+
+    input, select, textarea {  
+        width: 100%;  
+        padding: 12px;  
+        margin-bottom: 10px;  
+        border: 1px solid #ccc;  
+        border-radius: 6px;  
+        box-sizing: border-box;  
+        font-size: 16px;  
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
+    }  
+
+    input:focus, select:focus, textarea:focus {  
+        outline: none;  
+        border-color: #3498db;  
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);  
+    }  
+
+    button {  
+        width: 100%;  
+        padding: 12px;  
+        margin-bottom: 10px;  
+        border: none;  
+        border-radius: 6px;  
+        background-color: #3498db;  
+        color: white;  
+        font-weight: bold;  
+        cursor: pointer;  
+        font-size: 16px;  
+        transition: background 0.2s;  
+    }  
+
+    button:hover {  
+        background-color: #2980b9;  
+    }  
+
+    button:active {  
+        transform: scale(0.98);  
+    }  
+
+    .secondary-btn {  
+        background-color: #27ae60;  
+        margin-top: 10px;  
+    }  
+
+    .secondary-btn:hover {  
+        background-color: #229954;  
+    }  
+
+    .danger-btn {  
+        background-color: #e74c3c;  
+        width: auto;  
+        padding: 8px 12px;  
+        margin: 0;  
+        font-size: 14px;  
+    }  
+
+    .danger-btn:hover {  
+        background-color: #c0392b;  
+    }  
+
+    #planView {  
+        margin-top: 25px;  
+        padding-top: 20px;  
+        border-top: 2px solid #ecf0f1;  
+    }  
+
+    .plan-item {  
+        background: #f8f9fa;  
+        padding: 12px;  
+        margin-bottom: 8px;  
+        border-left: 4px solid #2ecc71;  
+        border-radius: 4px;  
+    }  
+
+    .reminder-item {  
+        background: #f0f8ff;  
+        padding: 15px;  
+        margin-bottom: 15px;  
+        border-left: 4px solid #3498db;  
+        border-radius: 4px;  
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);  
+    }  
+
+    .reminder-item.warning {  
+        border-left-color: #f39c12;  
+    }  
+
+    .reminder-item.overdue {  
+        background: #ffe6e6;  
+        border-left-color: #e74c3c;  
+    }  
+
+    .reminder-header {  
+        display: flex;  
+        justify-content: space-between;  
+        align-items: center;  
+        margin-bottom: 10px;  
+    }  
+
+    .reminder-subject {  
+        font-weight: bold;  
+        color: #2c3e50;  
+        font-size: 16px;  
+    }  
+
+    .reminder-time {  
+        color: #7f8c8d;  
+        font-size: 14px;  
+        margin: 5px 0;  
+    }  
+
+    .reminder-task {  
+        color: #34495e;  
+        font-size: 14px;  
+        margin: 5px 0;  
+    }  
+
+    .reminder-repeat {  
+        color: #16a085;  
+        font-size: 12px;  
+        background: #e8f8f5;  
+        padding: 4px 8px;  
+        border-radius: 4px;  
+        display: inline-block;  
+        margin-top: 5px;  
+    }  
+
+    .reminder-actions {  
+        display: flex;  
+        gap: 8px;  
+        margin-top: 10px;  
+    }  
+
+    .reminder-actions button {  
+        flex: 1;  
+        margin: 0;  
+    }  
+
+    .empty-state {  
+        text-align: center;  
+        color: #7f8c8d;  
+        padding: 20px;  
+        font-style: italic;  
+    }  
+
+    .notification-badge {  
+        background: #e74c3c;  
+        color: white;  
+        padding: 2px 8px;  
+        border-radius: 12px;  
+        font-size: 12px;  
+        margin-left: 10px;  
+    }  
+
+    .tabs {  
+        display: flex;  
+        gap: 10px;  
+        margin-bottom: 20px;  
+        border-bottom: 2px solid #ecf0f1;  
+    }  
+
+    .tab-btn {  
+        flex: 1;  
+        padding: 12px;  
+        border: none;  
+        background: white;  
+        color: #7f8c8d;  
+        cursor: pointer;  
+        font-weight: 600;  
+        border-bottom: 3px solid transparent;  
+        transition: all 0.3s;  
+    }  
+
+    .tab-btn.active {  
+        color: #3498db;  
+        border-bottom-color: #3498db;  
+    }  
+
+    .tab-btn:hover {  
+        background: #f8f9fa;  
+    }  
+
+    .tab-content {  
+        display: none;  
+    }  
+
+    .tab-content.active {  
+        display: block;  
+    }  
+
+    .modal {  
+        display: none;  
+        position: fixed;  
+        top: 0;  
+        left: 0;  
+        width: 100%;  
+        height: 100%;  
+        background: rgba(0,0,0,0.5);  
+        align-items: center;  
+        justify-content: center;  
+        z-index: 1000;  
+    }  
+
+    .modal.active {  
+        display: flex;  
+    }  
+
+    .modal-content {  
+        background: white;  
+        padding: 30px;  
+        border-radius: 12px;  
+        max-width: 400px;  
+        width: 90%;  
+        text-align: center;  
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);  
+    }  
+
+    .modal-content h2 {  
+        border: none;  
+        padding: 0;  
+        margin-top: 0;  
+    }  
+
+    .modal-content p {  
+        margin: 15px 0;  
+        font-size: 18px;  
+    }  
+
+    .modal-actions {  
+        display: flex;  
+        gap: 10px;  
+        margin-top: 20px;  
+    }  
+
+    .modal-actions button {  
+        flex: 1;  
+        margin: 0;  
+    }  
+
+    @media (max-width: 768px) {  
+        .main-wrapper {  
+            flex-direction: column;  
+        }  
+
+        .container {  
+            max-width: 100%;  
+        }  
+    }  
+</style>
+
+</head>  
+<body>  <div class="main-wrapper">  
+    <!-- Study Planner Section -->  
+    <div class="container">  
+        <h1>📅 AI Study Planner</h1>  <label for="topic">What are you studying?</label>  
+    <input type="text" id="topic" placeholder="e.g., JavaScript Basics, History Chapter 4">  
+      
+    <label for="hours">Available Hours:</label>  
+    <input type="number" id="hours" min="1" max="12" value="2">  
+      
+    <label for="pace">Study Pace:</label>  
+    <select id="pace">  
+        <option value="relaxed">Relaxed (Includes plenty of breaks)</option>  
+        <option value="normal" selected>Normal (Balanced focus)</option>  
+        <option value="intense">Intense (Deep focus sprint)</option>  
+    </select>  
+      
+    <button onclick="generatePlan()">Generate Study Plan</button>  
+      
+    <div id="planView"></div>  
+</div>  
+
+<!-- Reminder System Section -->  
+<div class="container">  
+    <h1>🔔 Study Reminders</h1>  
+      
+    <div class="tabs">  
+        <button class="tab-btn active" onclick="switchTab('add-reminder')">Add Reminder</button>  
+        <button class="tab-btn" onclick="switchTab('reminder-list')">My Reminders <span class="notification-badge" id="reminderCount">0</span></button>  
+    </div>  
+
+    <!-- Add Reminder Tab -->  
+    <div id="add-reminder" class="tab-content active">  
+        <label for="subject">Subject Name:</label>  
+        <input type="text" id="subject" placeholder="e.g., Mathematics, Biology">  
+          
+        <label for="task">Topic/Task:</label>  
+        <textarea id="task" placeholder="e.g., Chapter 5 - Trigonometry" rows="3"></textarea>  
+          
+        <label for="reminderDate">Date:</label>  
+        <input type="date" id="reminderDate">  
+          
+        <label for="reminderTime">Time:</label>  
+        <input type="time" id="reminderTime">  
+          
+        <label for="soundSelect">Notification Sound:</label>  
+        <select id="soundSelect">  
+            <option value="bell">Bell Sound</option>  
+            <option value="alarm">Alarm Sound</option>  
+            <option value="chime">Chime Sound</option>  
+            <option value="beep">Beep Sound</option>  
+        </select>  
+          
+        <label for="repeatOption">Repeat:</label>  
+        <select id="repeatOption">  
+            <option value="none">None</option>  
+            <option value="daily">Daily</option>  
+            <option value="weekly">Weekly</option>  
+        </select>  
+          
+        <button class="secondary-btn" onclick="addReminder()">Add Reminder</button>  
+    </div>  
+
+    <!-- Reminder List Tab -->  
+    <div id="reminder-list" class="tab-content">  
+        <div id="remindersList"></div>  
+    </div>  
+</div>
+
+</div>  <!-- Notification Modal -->  <div id="notificationModal" class="modal">  
+    <div class="modal-content">  
+        <h2 id="notificationTitle">Study Reminder!</h2>  
+        <p id="notificationSubject"></p>  
+        <p id="notificationTask"></p>  
+        <div class="modal-actions">  
+            <button onclick="dismissNotification()">Dismiss</button>  
+            <button class="secondary-btn" onclick="snoozeReminder()">Snooze (5 min)</button>  
+        </div>  
+    </div>  
+</div>  <script>  
+    // Bell sound using Web Audio API  
+    function playSound(soundType) {  
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();  
+        const now = audioContext.currentTime;  
+  
+        switch(soundType) {  
+            case 'bell':  
+                playBellSound(audioContext, now);  
+                break;  
+            case 'alarm':  
+                playAlarmSound(audioContext, now);  
+                break;  
+            case 'chime':  
+                playChimeSound(audioContext, now);  
+                break;  
+            case 'beep':  
+                playBeepSound(audioContext, now);  
+                break;  
+        }  
+    }  
+  
+    function playBellSound(ctx, now) {  
+        const osc = ctx.createOscillator();  
+        const gain = ctx.createGain();  
+        osc.connect(gain);  
+        gain.connect(ctx.destination);  
+  
+        osc.frequency.setValueAtTime(800, now);  
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.5);  
+        gain.gain.setValueAtTime(0.3, now);  
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);  
+  
+        osc.start(now);  
+        osc.stop(now + 0.5);  
+    }  
+  
+    function playAlarmSound(ctx, now) {  
+        for (let i = 0; i < 3; i++) {  
+            const osc = ctx.createOscillator();  
+            const gain = ctx.createGain();  
+            osc.connect(gain);  
+            gain.connect(ctx.destination);  
+  
+            osc.frequency.setValueAtTime(1000, now + i * 0.3);  
+            gain.gain.setValueAtTime(0.2, now + i * 0.3);  
+            gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.3 + 0.2);  
+  
+            osc.start(now + i * 0.3);  
+            osc.stop(now + i * 0.3 + 0.2);  
+        }  
+    }  
+  
+    function playChimeSound(ctx, now) {  
+        const frequencies = [523.25, 659.25, 783.99];  
+        frequencies.forEach((freq, index) => {  
+            const osc = ctx.createOscillator();  
+            const gain = ctx.createGain();  
+            osc.connect(gain);  
+            gain.connect(ctx.destination);  
+  
+            osc.frequency.setValueAtTime(freq, now + index * 0.15);  
+            gain.gain.setValueAtTime(0.2, now + index * 0.15);  
+            gain.gain.exponentialRampToValueAtTime(0.01, now + index * 0.15 + 0.3);  
+  
+            osc.start(now + index * 0.15);  
+            osc.stop(now + index * 0.15 + 0.3);  
+        });  
+    }  
+  
+    function playBeepSound(ctx, now) {  
+        const osc = ctx.createOscillator();  
+        const gain = ctx.createGain();  
+        osc.connect(gain);  
+        gain.connect(ctx.destination);  
+  
+        osc.frequency.setValueAtTime(1000, now);  
+        gain.gain.setValueAtTime(0.3, now);  
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);  
+  
+        osc.start(now);  
+        osc.stop(now + 0.1);  
+    }  
+  
+    // Request notification permission  
+    function requestNotificationPermission() {  
+        if ('Notification' in window && Notification.permission === 'default') {  
+            Notification.requestPermission();  
+        }  
+    }  
+  
+    // Reminders array  
+    let reminders = JSON.parse(localStorage.getItem('studyReminders')) || [];  
+  
+    // Save reminders to localStorage  
+    function saveReminders() {  
+        localStorage.setItem('studyReminders', JSON.stringify(reminders));  
+    }  
+  
+    // Add reminder  
+    function addReminder() {  
+        const subject = document.getElementById('subject').value.trim();  
+        const task = document.getElementById('task').value.trim();  
+        const date = document.getElementById('reminderDate').value;  
+        const time = document.getElementById('reminderTime').value;  
+        const sound = document.getElementById('soundSelect').value;  
+        const repeat = document.getElementById('repeatOption').value;  
+  
+        if (!subject || !task || !date || !time) {  
+            alert('Please fill in all fields!');  
+            return;  
+        }  
+  
+        const reminder = {  
+            id: Date.now(),  
+            subject,  
+            task,  
+            date,  
+            time,  
+            sound,  
+            repeat,  
+            active: true  
+        };  
+  
+        reminders.push(reminder);  
+        saveReminders();  
+  
+        // Clear form  
+        document.getElementById('subject').value = '';  
+        document.getElementById('task').value = '';  
+        document.getElementById('reminderDate').value = '';  
+        document.getElementById('reminderTime').value = '';  
+        document.getElementById('soundSelect').value = 'bell';  
+        document.getElementById('repeatOption').value = 'none';  
+  
+        alert('Reminder added successfully!');  
+        displayReminders();  
+        checkReminders();  
+    }  
+  
+    // Display reminders list  
+    function displayReminders() {  
+        const remindersList = document.getElementById('remindersList');  
+        updateReminderCount();  
+  
+        if (reminders.length === 0) {  
+            remindersList.innerHTML = '<div class="empty-state">No reminders yet. Add one to get started!</div>';  
+            return;  
+        }  
+  
+        let html = '';  
+        const now = new Date();  
+  
+        reminders.forEach(reminder => {  
+            const reminderDateTime = new Date(`${reminder.date}T${reminder.time}`);  
+            const isOverdue = reminderDateTime < now;  
+            const isUpcoming = reminderDateTime - now < 3600000; // Within 1 hour  
+  
+            const itemClass = isOverdue ? 'overdue' : isUpcoming ? 'warning' : '';  
+            const statusLabel = isOverdue ? '⏰ Overdue' : isUpcoming ? '⚠️ Upcoming' : '✓ Scheduled';  
+  
+            html += `  
+                <div class="reminder-item ${itemClass}">  
+                    <div class="reminder-header">  
+                        <span class="reminder-subject">${reminder.subject}</span>  
+                        <span style="font-size: 12px; color: #7f8c8d;">${statusLabel}</span>  
+                    </div>  
+                    <div class="reminder-task">📝 ${reminder.task}</div>  
+                    <div class="reminder-time">📅 ${reminder.date} at ${reminder.time}</div>  
+                    <div class="reminder-time">🔊 ${reminder.sound.charAt(0).toUpperCase() + reminder.sound.slice(1)}</div>  
+                    ${reminder.repeat !== 'none' ? `<div class="reminder-repeat">🔄 Repeats ${reminder.repeat}</div>` : ''}  
+                    <div class="reminder-actions">  
+                        <button class="danger-btn" onclick="deleteReminder(${reminder.id})">Delete</button>  
+                    </div>  
+                </div>  
+            `;  
+        });  
+  
+        remindersList.innerHTML = html;  
+    }  
+  
+    // Delete reminder  
+    function deleteReminder(id) {  
+        reminders = reminders.filter(r => r.id !== id);  
+        saveReminders();  
+        displayReminders();  
+    }  
+  
+    // Update reminder count badge  
+    function updateReminderCount() {  
+        const count = reminders.length;  
+        document.getElementById('reminderCount').textContent = count;  
+        document.getElementById('reminderCount').style.display = count > 0 ? 'inline-block' : 'none';  
+    }  
+  
+    // Check reminders and trigger notifications  
+    function checkReminders() {  
+        const now = new Date();  
+  
+        reminders.forEach(reminder => {  
+            if (!reminder.active) return;  
+  
+            const reminderDateTime = new Date(`${reminder.date}T${reminder.time}`);  
+            const timeDiff = reminderDateTime - now;  
+  
+            // Trigger notification if within 1 minute  
+            if (timeDiff > 0 && timeDiff <= 60000) {  
+                triggerReminder(reminder);  
+                  
+                // Handle repeat  
+                if (reminder.repeat === 'daily') {  
+                    reminder.date = new Date(reminderDateTime.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];  
+                } else if (reminder.repeat === 'weekly') {  
+                    reminder.date = new Date(reminderDateTime.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];  
+                } else {  
+                    reminder.active = false;  
+                }  
+                saveReminders();  
+            }  
+        });  
+    }  
+  
+    // Trigger reminder notification  
+    function triggerReminder(reminder) {  
+        // Play sound  
+        playSound(reminder.sound);  
+  
+        // Show modal  
+        document.getElementById('notificationSubject').textContent = `Subject: ${reminder.subject}`;  
+        document.getElementById('notificationTask').textContent = `Task: ${reminder.task}`;  
+        document.getElementById('notificationModal').classList.add('active');  
+        document.getElementById('notificationModal').dataset.reminderId = reminder.id;  
+  
+        // Browser notification  
+        if ('Notification' in window && Notification.permission === 'granted') {  
+            new Notification('Study Reminder!', {  
+                body: `${reminder.subject}: ${reminder.task}`,  
+                icon: '🔔'  
+            });  
+        }  
+    }  
+  
+    // Dismiss notification  
+    function dismissNotification() {  
+        document.getElementById('notificationModal').classList.remove('active');  
+    }  
+  
+    // Snooze reminder  
+    function snoozeReminder() {  
+        const reminderId = parseInt(document.getElementById('notificationModal').dataset.reminderId);  
+        const reminder = reminders.find(r => r.id === reminderId);  
+          
+        if (reminder) {  
+            const snoozedTime = new Date();  
+            snoozedTime.setMinutes(snoozedTime.getMinutes() + 5);  
+              
+            reminder.date = snoozedTime.toISOString().split('T')[0];  
+            reminder.time = snoozedTime.toTimeString().slice(0, 5);  
+            saveReminders();  
+            displayReminders();  
+        }  
+          
+        dismissNotification();  
+    }  
+  
+    // Switch tabs  
+    function switchTab(tabName) {  
+        // Hide all tabs  
+        document.querySelectorAll('.tab-content').forEach(tab => {  
+            tab.classList.remove('active');  
+        });  
+        document.querySelectorAll('.tab-btn').forEach(btn => {  
+            btn.classList.remove('active');  
+        });  
+  
+        // Show selected tab  
+        document.getElementById(tabName).classList.add('active');  
+        event.target.classList.add('active');  
+  
+        if (tabName === 'reminder-list') {  
+            displayReminders();  
+        }  
+    }  
+  
+    // Study Planner Functions  
+    function generatePlan() {  
+        const topic = document.getElementById("topic").value.trim();  
+        const hours = parseInt(document.getElementById("hours").value);  
+        const pace = document.getElementById("pace").value;  
+        const planView = document.getElementById("planView");  
+          
+        if (!topic) {  
+            alert("Please enter a study topic!");  
+            return;  
+        }  
+          
+        let html = "<h3>Your Personalized Plan:</h3>";  
+        let intervals = hours * 2;  
+          
+        if (pace === "relaxed") {  
+            html += `<div class="plan-item"><strong>00:00 - 00:30</strong>: Introduction to ${topic} (Read gently)</div>`;  
+            html += `<div class="plan-item"><strong>00:30 - 00:45</strong>: ☕ 15-Minute Refreshment Break</div>`;  
+            html += `<div class="plan-item"><strong>00:45 - 01:15</strong>: Review core concepts and examples</div>`;  
+            if (hours > 1) {  
+                html += `<div class="plan-item"><strong>01:15 - 02:00</strong>: Short quiz & simple practice problems</div>`;  
+            }  
+        } else if (pace === "intense") {  
+            html += `<div class="plan-item"><strong>00:00 - 00:45</strong>: High-focus study core principles of ${topic}</div>`;  
+            html += `<div class="plan-item"><strong>00:45 - 00:50</strong>: 🛑 5-Minute quick stretch break</div>`;  
+            html += `<div class="plan-item"><strong>00:50 - 01:40</strong>: Advanced practice exercises & logic application</div>`;  
+            if (hours > 1) {  
+                html += `<div class="plan-item"><strong>01:40 - 02:00</strong>: Summary writing and error correction tracking</div>`;  
+            }  
+        } else {  
+            html += `<div class="plan-item"><strong>00:00 - 00:40</strong>: Break down the main parts of ${topic}</div>`;  
+            html += `<div class="plan-item"><strong>00:40 - 00:50</strong>: 🚶 10-Minute walk break</div>`;  
+            html += `<div class="plan-item"><strong>00:50 - 01:30</strong>: Active recall testing and notebook sketching</div>`;  
+            if (hours > 1) {  
+                html += `<div class="plan-item"><strong>01:30 - 02:00</strong>: Final summary review and organizing next steps</div>`;  
+            }  
+        }  
+          
+        planView.innerHTML = html;  
+    }  
+  
+    // Initialize  
+    window.addEventListener('load', function() {  
+        requestNotificationPermission();  
+        setInterval(checkReminders, 10000); // Check every 10 seconds  
+        displayReminders();  
+        updateReminderCount();  
+    });  
+</script>  </body>  
+</html>  
