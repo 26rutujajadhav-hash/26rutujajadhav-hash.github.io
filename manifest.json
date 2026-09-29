@@ -1,0 +1,16 @@
+{
+  "name": "AI Study Planner",
+  "short_name": "Study Planner",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0D1117",
+  "theme_color": "#0D1117",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
